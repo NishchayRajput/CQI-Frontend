@@ -1,3 +1,4 @@
+'use client';
 import Link from 'next/link';
 import {
   Home,
@@ -11,27 +12,14 @@ import {
   Users2
 } from 'lucide-react';
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip';
 import { Analytics } from '@vercel/analytics/react';
-// import { User } from './user';
-import { VercelLogo } from '@/components/icons';
 import Providers from './providers';
 import { NavItem } from './nav-item';
 import { SearchInput } from './search';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({
   children
@@ -60,6 +48,20 @@ export default function DashboardLayout({
 }
 
 function DesktopNav() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/logout`);
+      if (response.status === 200) {
+        console.log('Logout successful');
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
@@ -77,20 +79,16 @@ function DesktopNav() {
         <NavItem href="profile" label="Profile">
           <Users className="h-5 w-5" />
         </NavItem>
+        
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-        {/* <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href="#"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-            >
-              <Settings className="h-5 w-5" />
-              <span className="sr-only">Settings</span>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">Settings</TooltipContent>
-        </Tooltip> */}
+        <button
+          onClick={handleLogout}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Settings className="h-5 w-5" />
+          <span className="sr-only">Logout</span>
+        </button>
       </nav>
     </aside>
   );
