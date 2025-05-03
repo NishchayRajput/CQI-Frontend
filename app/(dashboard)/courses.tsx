@@ -89,7 +89,7 @@ export default function Courses() {
         <div className="flex justify-between items-center">
           <div>
             <CardTitle>Courses</CardTitle>
-            <CardDescription>List of all courses</CardDescription>
+            <CardDescription className="mt-2">List of all courses</CardDescription>
           </div>
           <Dialog>
             <DialogTrigger asChild>
@@ -114,7 +114,7 @@ export default function Courses() {
                       type="text"
                       value={formCourseCode}
                       onChange={(e) => setFormCourseCode(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 p-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Enter course code"
                       required
                     />
@@ -129,13 +129,12 @@ export default function Courses() {
                       type="text"
                       value={formCourseName}
                       onChange={(e) => setFormCourseName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 p-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Enter course title"
                       required
                     />
                   </div>
                 </div>
-                <hr className="border-gray-200" />
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="professorName" className="block text-sm font-medium text-gray-700">
@@ -146,7 +145,7 @@ export default function Courses() {
                       name="professorName"
                       value={formCourseProfName}
                       onChange={(e) => setFormCourseProfName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-3 p-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       required
                     >
                       <option value="">Select a professor</option>
@@ -167,7 +166,7 @@ export default function Courses() {
                       type="text"
                       value={formYear}
                       onChange={(e) => setFormYear(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 p-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Enter year"
                       required
                     />
@@ -181,7 +180,7 @@ export default function Courses() {
                       name="semester"
                       value={formCourseType}
                       onChange={(e) => setFormCourseType(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 p-3 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       required
                     >
                       <option value="">Select a semester</option>

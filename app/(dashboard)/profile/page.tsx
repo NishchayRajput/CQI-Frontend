@@ -15,7 +15,7 @@ export default function ProfilePage() {
     .toUpperCase();
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    <div className="top-0 flex justify-center items-center mt-32 bg-gray-50">
       <Card className="w-full max-w-2xl p-16 shadow-lg rounded-lg">
         <CardHeader className="flex flex-col items-center">
           <div className="w-24 h-24 mb-4 rounded-full bg-gray-200 flex items-center justify-center text-4xl font-bold text-gray-600">
