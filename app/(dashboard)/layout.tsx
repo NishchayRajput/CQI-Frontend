@@ -7,6 +7,7 @@ import {
   Package2,
   PanelLeft,
   Settings,
+  LogOut,
   ShoppingCart,
   Users,
   Users2
@@ -77,17 +78,17 @@ function DesktopNav() {
           <Users2 className="h-5 w-5" />
         </NavItem>
 
-        <NavItem href="profile" label="Profile">
+        <NavItem href="/profile" label="Profile">
           <Users className="h-5 w-5" />
         </NavItem>
-        
+
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
         <button
           onClick={handleLogout}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground"
         >
-          <Settings className="h-5 w-5" />
+          <LogOut className="h-5 w-5" />
           <span className="sr-only">Logout</span>
         </button>
       </nav>
@@ -96,6 +97,18 @@ function DesktopNav() {
 }
 
 function MobileNav() {
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/logout`);
+      if (response.status === 200) {
+        console.log('Logout successful');
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -107,46 +120,33 @@ function MobileNav() {
       <SheetContent side="left" className="sm:max-w-xs">
         <nav className="grid gap-6 text-lg font-medium">
           <Link
-            href="#"
-            className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-          >
-            <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-            <span className="sr-only">Vercel</span>
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-5 w-5" />
-            Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            Orders
-          </Link>
-          <Link
-            href="#"
+            href="/"
             className="flex items-center gap-4 px-2.5 text-foreground"
           >
-            <Package className="h-5 w-5" />
-            Products
+            <Home className="h-5 w-5" />
+            Home
           </Link>
           <Link
-            href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            href="/users"
+            className="flex items-center gap-4 px-2.5 text-foreground"
           >
             <Users2 className="h-5 w-5" />
-            Users
+            User
+          </Link>
+          <Link
+            href="/profile"
+            className="flex items-center gap-4 px-2.5 text-foreground"
+          >
+            <Users className="h-5 w-5" />
+            Profile
           </Link>
           <Link
             href="#"
-            className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            onClick={handleLogout}
+            className="flex items-center gap-4 px-2.5 text-foreground"
           >
-            <LineChart className="h-5 w-5" />
-            Settings
+            <LogOut className="h-5 w-5" />
+            LogOut
           </Link>
         </nav>
       </SheetContent>

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -24,7 +25,7 @@ import axios from 'axios';
 
 export default function Courses() {
   const [professors, setProfessors] = useState<{ _id: string; Name: string }[]>([]);
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<{ id: string; name: string; professorId?: { Name: string }; year: string }[]>([]);
   const semesters = ['Monsoon', 'Winter', 'Summer'];
 
   const [formCourseCode, setFormCourseCode] = useState('');
@@ -62,15 +63,15 @@ export default function Courses() {
     console.log('Updated courses:', courses);
   }, [courses]);
 
-  const handleAddCourse = async (event) => {
+  const handleAddCourse = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       const newCourse = {
-          id: formCourseCode,
-          name: formCourseName,
-          professorId: formCourseProfName,
-          year: formYear,
-          type: formCourseType.toLocaleLowerCase(),
+        id: formCourseCode,
+        name: formCourseName,
+        professorId: formCourseProfName,
+        year: formYear,
+        type: formCourseType.toLocaleLowerCase(),
       };
 
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/course/create`, newCourse);
@@ -78,9 +79,9 @@ export default function Courses() {
 
       // Optionally, refresh the course list
       fetchCourses();
-  } catch (error) {
+    } catch (error) {
       console.error('Failed to add course:', error);
-  }
+    }
   };
 
   return (
@@ -196,6 +197,11 @@ export default function Courses() {
                   <Button type="submit" className="w-full">
                     Add Course
                   </Button>
+                  <DialogClose asChild>
+                    <Button type="button" className="w-full">
+                      Close
+                    </Button>
+                  </DialogClose>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -208,7 +214,7 @@ export default function Courses() {
             key={index}
             courseCode={course.id}
             courseTitle={course.name}
-            professorName={course.professorId?.Name}
+            professorName={course.professorId?.Name || ''}
             year={course.year}
           />
         ))}

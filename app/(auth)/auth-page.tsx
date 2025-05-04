@@ -54,7 +54,7 @@ export default function AuthPage() {
             console.log('Login successful:', response.data);
             router.push('/'); // Redirect to base URL on successful login
         } catch (error) {
-            if (error.response) {
+            if (axios.isAxiosError(error) && error.response) {
                 console.error('Error during login:', error.response.data); // Log server error details
                 alert(`Login failed: ${error.response.data.error || 'Please try again.'}`);
             } else {
