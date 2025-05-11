@@ -87,17 +87,9 @@ function DesktopNav() {
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-
-
-        {(userRole === 'admin') && 
         <NavItem href="/" label="Dashboard">
           <Home className="h-5 w-5" />
-        </NavItem>}
-        {/* Link the personal dash boaard of the professors with individual course list */}
-        {(userRole === 'professor') && 
-        <NavItem href="/" label="Dashboard">
-          <Home className="h-5 w-5" />
-        </NavItem>}
+        </NavItem>
 
         {(userRole === 'admin') && 
         <NavItem href="/users" label="Users">
@@ -150,7 +142,7 @@ function MobileNav() {
   useEffect(() => {
     checkAuth();
   }, []);
-  
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -161,16 +153,13 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="sm:max-w-xs">
         <nav className="grid gap-6 text-lg font-medium">
-          {(userRole === 'admin') && 
           <Link
             href="/"
             className="flex items-center gap-4 px-2.5 text-foreground"
           >
             <Home className="h-5 w-5" />
             Home
-          </Link>}
-          {/* Link the personal dash boaard of the professors with individual course list */}
-          {(userRole === 'admin') && 
+          </Link>{(userRole === 'admin') && 
           <Link
             href="/users"
             className="flex items-center gap-4 px-2.5 text-foreground"
