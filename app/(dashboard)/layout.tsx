@@ -13,6 +13,7 @@ import {
   Users2
 } from 'lucide-react';
 
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Analytics } from '@vercel/analytics/react';
@@ -22,11 +23,16 @@ import { SearchInput } from './search';
 import axios from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
 
+  
+
+ 
+
 export default function DashboardLayout({
   children
 }: {
   children: React.ReactNode;
-}) {
+}) { 
+ 
   const pathname = usePathname();
   return (
     <Providers>
@@ -56,7 +62,6 @@ function DesktopNav() {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/logout`);
       if (response.status === 200) {
-
         console.log('Logout successful');
         router.push('/login');
       }
@@ -64,20 +69,40 @@ function DesktopNav() {
       console.error('Logout failed:', error);
     }
   };
-
+  const [authStatus, setAuthStatus] = useState<string>('');
+  const [userRole,setUserRole] = useState<string>('');
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`);
+      setAuthStatus(response.data.loggedIn);
+      setUserRole(response.data.user.role);
+      console.log('Auth user:', response.data.role);
+    } catch (error) {
+      console.error('Failed to fetch auth status:', error);
+    }
+  };
+  useEffect(() => {
+    checkAuth();
+  }, []);
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
 
 
+        {(userRole === 'admin') && 
         <NavItem href="/" label="Dashboard">
           <Home className="h-5 w-5" />
-        </NavItem>
+        </NavItem>}
+        {/* Link the personal dash boaard of the professors with individual course list */}
+        {(userRole === 'professor') && 
+        <NavItem href="/" label="Dashboard">
+          <Home className="h-5 w-5" />
+        </NavItem>}
 
-
+        {(userRole === 'admin') && 
         <NavItem href="/users" label="Users">
           <Users2 className="h-5 w-5" />
-        </NavItem>
+        </NavItem>}
 
         <NavItem href="/profile" label="Profile">
           <Users className="h-5 w-5" />
@@ -110,6 +135,22 @@ function MobileNav() {
       console.error('Logout failed:', error);
     }
   };
+  const [authStatus, setAuthStatus] = useState<string>('');
+  const [userRole,setUserRole] = useState<string>('');
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`);
+      setAuthStatus(response.data.loggedIn);
+      setUserRole(response.data.user.role);
+      console.log('Auth user:', response.data.role);
+    } catch (error) {
+      console.error('Failed to fetch auth status:', error);
+    }
+  };
+  useEffect(() => {
+    checkAuth();
+  }, []);
+  
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -120,20 +161,23 @@ function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="sm:max-w-xs">
         <nav className="grid gap-6 text-lg font-medium">
+          {(userRole === 'admin') && 
           <Link
             href="/"
             className="flex items-center gap-4 px-2.5 text-foreground"
           >
             <Home className="h-5 w-5" />
             Home
-          </Link>
+          </Link>}
+          {/* Link the personal dash boaard of the professors with individual course list */}
+          {(userRole === 'admin') && 
           <Link
             href="/users"
             className="flex items-center gap-4 px-2.5 text-foreground"
           >
             <Users2 className="h-5 w-5" />
             User
-          </Link>
+          </Link>}
           <Link
             href="/profile"
             className="flex items-center gap-4 px-2.5 text-foreground"
