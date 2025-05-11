@@ -56,6 +56,7 @@ function DesktopNav() {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/logout`);
       if (response.status === 200) {
+
         console.log('Logout successful');
         router.push('/login');
       }

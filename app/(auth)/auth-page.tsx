@@ -43,7 +43,8 @@ export default function AuthPage() {
                     headers: {
                         username,
                         password
-                    }
+                    },
+                    withCredentials: true // Include credentials in the request
                 }
             );
 

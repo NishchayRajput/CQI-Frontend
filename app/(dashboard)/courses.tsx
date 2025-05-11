@@ -216,6 +216,7 @@ export default function Courses() {
             courseTitle={course.name}
             professorName={course.professorId?.Name || ''}
             year={course.year}
+            id={course._id}
           />
         ))}
       </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import {
@@ -12,44 +13,100 @@ import {
 } from '@/components/ui/card';
 import SCQuestion from '@/components/ui/sc_question';
 import AdditionalFeedback from '@/components/ui/additional_feedback';
+import router from 'next/router';
+import axios from 'axios';
 
 export default function FeedbackPage() {
-  const [formData, setFormData] = useState({
-    questions: [
-      { id: 1, text: "This lecturer has a pleasant personality.", rating: "" },
-      { id: 2, text: "The course content is well-organized.", rating: "" },
-      { id: 3, text: "The lecturer explains concepts clearly.", rating: "" },
-    ],
-    additionalFeedbacks: [
-      { id: 1, text: "" },
-      { id: 2, text: "" },
-      { id: 3, text: "" },
-    ],
-  });
+  const [formData, setFormData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const courseCode = searchParams.get("courseCode");
+  const courseId = searchParams.get("courseId");
+  const token = searchParams.get("t");
+  const professorName = searchParams.get("professorName");
+  const courseTitle = searchParams.get("courseName");
+  useEffect(() => {
+    if (!courseCode || !courseId || !token || !professorName || !courseTitle) {
+      router.push("/error"); // Redirect to an error page
+    }
+  }, [courseCode, courseId, token, professorName, courseTitle, router]);
 
-  const handleInputChange = (questionId: number, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      questions: prev.questions.map((q) =>
-        q.id === questionId ? { ...q, rating: value } : q
-      ),
-    }));
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/question/list`);
+        const data = await response.data;
+        console.log(data);
+        if (data.message === "Questions fetched successfully") {
+          const formattedData = data.questions.map((question, index) => ({
+            id: question._id,
+            text: question.text,
+            type: question.type,
+            options: question.options,
+            answer: question.type === "option" ? "" : "",
+            number: index + 1, // Add question number
+          }));
+          setFormData(formattedData);
+        }
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+  const handleInputChange = (questionId, value) => {
+    setFormData((prev) =>
+      prev.map((q) =>
+        q.id === questionId ? { ...q, answer: value } : q
+      )
+    );
   };
 
-  const handleAdditionalFeedbackChange = (feedbackId: number, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      additionalFeedbacks: prev.additionalFeedbacks.map((feedback) =>
-        feedback.id === feedbackId ? { ...feedback, text: value } : feedback
-      ),
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data Submitted:', formData);
-    // Abackend logic
+  
+    // Transform formData into the required format
+    const feedbackData = {
+      courseId: searchParams.get('courseId'), // Assuming courseId is passed in the URL
+      token: searchParams.get('t'), // Assuming token is passed in the URL
+      responses: formData.map((question) => ({
+        questionId: question.id,
+        response: question.answer,
+      })),
+    };
+  
+    console.log('Feedback Data to Submit:', feedbackData);
+  
+    try {
+      // Submit the feedback to the backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/feedback/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData),
+      });
+      console.log(feedbackData);
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Feedback submitted successfully:', result);
+        // Optionally, show a success message or redirect the user
+      } else {
+        console.error('Failed to submit feedback:', result);
+      }
+    } catch (error) {
+      console.log(error);
+      console.error('Error submitting feedback:', error);
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex-col justify-center items-start md:items-center p-4 md:p-32">
@@ -58,15 +115,15 @@ export default function FeedbackPage() {
           <CardTitle className="text-2xl">Your Feedback Matters!</CardTitle>
           <div className="flex gap-2">
             <h3 className="text-l font-bold">Course Name:</h3>
-            <h3 className="text-l">Advance Sensing Technique</h3>
+            <h3 className="text-l">{courseTitle}</h3>
           </div>
           <div className="flex gap-2">
             <h3 className="text-l font-bold">Course Code:</h3>
-            <h3 className="text-l">EE651</h3>
+            <h3 className="text-l">{courseCode}</h3>
           </div>
           <div className="flex gap-2">
             <h3 className="text-l font-bold">Professor Name:</h3>
-            <h3 className="text-l">Dr. Avishek Adhikary</h3>
+            <h3 className="text-l">{professorName}</h3>
           </div>
           <hr />
           <CardDescription>
@@ -78,19 +135,37 @@ export default function FeedbackPage() {
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="space-y-5">
-              {formData.questions.map((question) => (
-                <SCQuestion
-                  key={question.id}
-                  question={question}
-                  handleInputChange={handleInputChange}
-                />
-              ))}
-              {formData.additionalFeedbacks.map((feedback) => (
-                <AdditionalFeedback
-                  key={feedback.id}
-                  feedback={feedback}
-                  handleFeedbackChange={handleAdditionalFeedbackChange}
-                />
+              {formData.map((question) => (
+                <div key={question.id} className="space-y-2">
+                  <h4 className="text-lg font-semibold">
+                    {question.number}. {question.text}
+                  </h4>
+                  {question.type === "option" ? (
+                    <div className="flex flex-wrap gap-x-4">
+                      {question.options.map((option, index) => (
+                        <label key={index} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`question-${question.id}`}
+                            value={option}
+                            onChange={(e) =>
+                              handleInputChange(question.id, e.target.value)
+                            }
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <textarea
+                      className="w-full p-2 border rounded"
+                      placeholder="Write your feedback here..."
+                      onChange={(e) =>
+                        handleInputChange(question.id, e.target.value)
+                      }
+                    />
+                  )}
+                </div>
               ))}
             </div>
 
