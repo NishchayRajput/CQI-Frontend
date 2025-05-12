@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter,useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import {
@@ -25,43 +25,40 @@ type Question = {
 };
 
 export default function IndivFeedbackPage() {
+  const params = useParams();
+  const router = useRouter();
   const [formData, setFormData] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const courseCode = searchParams.get("courseCode");
-  const courseId = searchParams.get("courseId");
-  const token = searchParams.get("t");
-  const professorName = searchParams.get("professorName");
-  const courseTitle = searchParams.get("courseName");
+  const feedbackId = params.f_id as string;
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchResponse = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/question/list`);
-        const data = response.data;
-        console.log(data);
-        if (data.message === "Questions fetched successfully") {
-          const formattedData: Question[] = data.questions.map((question: any, index: number) => ({
-            id: question._id,
-            text: question.text,
-            type: question.type,
-            options: question.options,
-            answer: question.type === "option" ? "" : "",
-            number: index + 1, // Add question number
-          }));
-          setFormData(formattedData);
-        }
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/feedback/list/individual/${feedbackId}`);
+        const data = response.data.feedbackResponse;
+        console.log("Response Data:", response.data);
+        // Assuming data.responses is the array you posted
+        const formattedData: Question[] = data.responses.map(
+          (item: any, idx: number) => ({
+            id: item.questionId._id,
+            text: item.questionId.text,
+            type: item.questionId.type,
+            options: item.questionId.options,
+            answer: item.response, // map the answer directly
+            number: idx + 1,
+          })
+        );
+        setFormData(formattedData);
+        console.log("Formatted Data:", formattedData);
       } catch (error) {
         console.error("Error fetching questions:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchQuestions();
-  }, []);
-
+  
+    fetchResponse();
+  }, [feedbackId]);
   const handleInputChange = (questionId: string, value: string) => {
     setFormData((prev) =>
       prev.map((q) =>
@@ -69,44 +66,6 @@ export default function IndivFeedbackPage() {
       )
     );
   };
-
-  // const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   // Transform formData into the required format
-  //   const feedbackData = {
-  //     courseId: searchParams.get('courseId'), // Assuming courseId is passed in the URL
-  //     token: searchParams.get('t'), // Assuming token is passed in the URL
-  //     responses: formData.map((question) => ({
-  //       questionId: question.id,
-  //       response: question.answer,
-  //     })),
-  //   };
-
-  //   console.log('Feedback Data to Submit:', feedbackData);
-
-  //   try {
-  //     // Submit the feedback to the backend
-  //     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/feedback/submit`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(feedbackData),
-  //     });
-  //     console.log(feedbackData);
-  //     const result = await response.json();
-  //     if (response.ok) {
-  //       console.log('Feedback submitted successfully:', result);
-  //       // Optionally, show a success message or redirect the user
-  //     } else {
-  //       console.error('Failed to submit feedback:', result);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     console.error('Error submitting feedback:', error);
-  //   }
-  // };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -116,25 +75,7 @@ export default function IndivFeedbackPage() {
     <div className="min-h-screen flex-col justify-center items-start md:items-center p-4 md:p-32">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl">Your Feedback Matters!</CardTitle>
-          <div className="flex gap-2">
-            <h3 className="text-l font-bold">Course Name:</h3>
-            <h3 className="text-l">{courseTitle}</h3>
-          </div>
-          <div className="flex gap-2">
-            <h3 className="text-l font-bold">Course Code:</h3>
-            <h3 className="text-l">{courseCode}</h3>
-          </div>
-          <div className="flex gap-2">
-            <h3 className="text-l font-bold">Professor Name:</h3>
-            <h3 className="text-l">{professorName}</h3>
-          </div>
-          <hr />
-          <CardDescription>
-            <div>Rate the course and provide your feedback to help us improve the course.</div>
-            <div>Select the rating of your choice.
-              The numbers stand for : 5 - Excellent, 4 - Very Good, 3 - Good, 2 - Average, 1 - Not Satisfactory.</div>
-          </CardDescription>
+          <CardTitle className="text-2xl">Feedback Response</CardTitle>
         </CardHeader>
         <CardContent>
           <form>
