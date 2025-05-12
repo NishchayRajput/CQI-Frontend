@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation"
+import axios from "axios"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -9,16 +10,16 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  Row,
-  Column,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable, HeaderGroup, Header, Cell
+  useReactTable,
+  Row,
+  Column,
+  HeaderGroup,
+  Header,
+  Cell,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
-import axios from "axios"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,55 +35,74 @@ export type Payment = {
   id: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+// ✅ Use a function to get the columns with access to router
+const getColumns = (router: ReturnType<typeof useRouter>): ColumnDef<Payment>[] => [
   {
     accessorKey: "feedback",
-    header: ({ column }: { column: Column<Payment> }) => {
-      return (
-        <div className="text-left">Feedback</div>
-      )
-    },
-    cell: ({ row }: { row: Row<Payment> }) => <div className="flex justify-start">Feedback {row.index + 1}</div>,
+    header: ({ column }: { column: Column<Payment> }) => (
+      <div className="text-left">Feedback</div>
+    ),
+    cell: ({ row }: { row: Row<Payment> }) => (
+      <div className="flex justify-start">Feedback {row.index + 1}</div>
+    ),
   },
   {
     accessorKey: "openFeeback",
     header: () => <div className="text-center">Detailed Feedback</div>,
-    cell: ({ row }: { row: Row<Payment> }) => {
-      return (
+    cell: ({ row }: { row: Row<Payment> }) => (
       <div className="flex justify-center">
-      <Button
-      variant="outline"
-      onClick={() => console.log(`Clicked feedback button:  ${row.original.id}`)}
-    >
-      Open
-    </Button></div>)
-    },
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/listFeedback/indivFeedback/${row.original.id}`)}
+        >
+          Open
+        </Button>
+      </div>
+    ),
   },
 ]
 
 export default function ListFeedback() {
-  const params = useParams();
-  const id = params.id;
+  const router = useRouter()
+  const params = useParams()
+  const id = params.id as string
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [fetchData, setFetchData] = React.useState<Payment[]>([]);
+  const [fetchData, setFetchData] = React.useState<Payment[]>([])
+
+  const columns = React.useMemo(() => getColumns(router), [router])
+
+  React.useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/feedback/list/${id}`
+        )
+        const feedbacks = response.data.feedbackResponses
+        const payments: Payment[] = feedbacks.map((fb: any) => ({
+          id: fb._id,
+        }))
+        setFetchData(payments)
+      } catch (error) {
+        console.error("Error fetching feedbacks:", error)
+      }
+    }
+    fetchFeedbacks()
+  }, [id])
 
   const table = useReactTable({
-    data:fetchData,
+    data: fetchData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
@@ -90,18 +110,6 @@ export default function ListFeedback() {
       rowSelection,
     },
   })
-
-  React.useEffect(() => {
-    const fetchFeedbacks = async () => {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/feedback/list/${id}`);
-      const feedbacks = response.data.feedbackResponses;
-      const payments: Payment[] = feedbacks.map((fb: any) => ({
-        id: fb._id,
-      }));
-      setFetchData(payments);
-    };
-    fetchFeedbacks();
-  }, [id]);
 
   return (
     <div className="w-full">
@@ -120,44 +128,33 @@ export default function ListFeedback() {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup: HeaderGroup<Payment>) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header: Header<Payment, unknown>) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header: Header<Payment, unknown>) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row: Row<Payment>) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell: Cell<Payment, unknown>) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
