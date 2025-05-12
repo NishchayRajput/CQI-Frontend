@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useParams } from "next/navigation";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,17 +17,9 @@ import {
   useReactTable, HeaderGroup, Header, Cell
 } from "@tanstack/react-table"
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import axios from "axios"
 
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -37,28 +30,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    feedback: "feedback1",
-  },
-  {
-    id: "3u1reuv4",
-    feedback: "feedback2",
-  },
-  {
-    id: "derv1ws0",
-    feedback: "feedback3",
-  },
-  {
-    id: "5kma53ae",
-    feedback: "feedback4",
-  },
-]
-
 export type Payment = {
   id: string
-  feedback: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -69,7 +42,7 @@ export const columns: ColumnDef<Payment>[] = [
         <div className="text-left">Feedback</div>
       )
     },
-    cell: ({ row }: { row: Row<Payment> }) => <div className="flex justify-start">{row.getValue("feedback")}</div>,
+    cell: ({ row }: { row: Row<Payment> }) => <div className="flex justify-start">Feedback {row.index + 1}</div>,
   },
   {
     accessorKey: "openFeeback",
@@ -79,7 +52,7 @@ export const columns: ColumnDef<Payment>[] = [
       <div className="flex justify-center">
       <Button
       variant="outline"
-      onClick={() => console.log("Clicked feedback button")}
+      onClick={() => console.log(`Clicked feedback button:  ${row.original.id}`)}
     >
       Open
     </Button></div>)
@@ -88,6 +61,8 @@ export const columns: ColumnDef<Payment>[] = [
 ]
 
 export default function ListFeedback() {
+  const params = useParams();
+  const id = params.id;
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -95,9 +70,10 @@ export default function ListFeedback() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [fetchData, setFetchData] = React.useState<Payment[]>([]);
 
   const table = useReactTable({
-    data,
+    data:fetchData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -115,6 +91,18 @@ export default function ListFeedback() {
     },
   })
 
+  React.useEffect(() => {
+    const fetchFeedbacks = async () => {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/feedback/list/${id}`);
+      const feedbacks = response.data.feedbackResponses;
+      const payments: Payment[] = feedbacks.map((fb: any) => ({
+        id: fb._id,
+      }));
+      setFetchData(payments);
+    };
+    fetchFeedbacks();
+  }, [id]);
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
@@ -126,28 +114,6 @@ export default function ListFeedback() {
           }
           className="max-w-sm"
         />
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </div>
       <div className="rounded-md border">
         <Table>

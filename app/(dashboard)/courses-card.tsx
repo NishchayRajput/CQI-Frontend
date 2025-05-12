@@ -10,7 +10,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from 'next/navigation';
 import {
@@ -29,7 +29,7 @@ type CardProps = React.ComponentProps<typeof Card> & {
     courseTitle: string,
     professorName: string,
     year: string,
-    id: string
+    id: string,
 }
 
 export function CoursesCard({ className, id, courseCode, courseTitle, professorName, year, ...props }: CardProps) {
@@ -42,11 +42,8 @@ export function CoursesCard({ className, id, courseCode, courseTitle, professorN
             const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/session/create`, {
                 courseId: id,
             });
-            console.log(response);
-
             // Check for 200 or 201 status
             if (response.status === 200 || response.status === 201) {
-                console.log(response.data.session);
                 setToken(response.data.session._id);
             } else {
                 console.error('Failed to generate token');
@@ -59,10 +56,6 @@ export function CoursesCard({ className, id, courseCode, courseTitle, professorN
         console.log(token);
         const response = await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/session/delete/${token}`, {
         })
-
-
-
-        console.log(response);
         if (response.status === 200) {
             setToken("");
         } else {
@@ -141,8 +134,7 @@ export function CoursesCard({ className, id, courseCode, courseTitle, professorN
                         </DialogContent>
                     </Dialog>
                     <Button className="w-auto" onClick={() => {
-                        router.push(`/${courseCode}/feedback`);
-
+                        router.push(`/listFeedback/${id}`);
                     }}>
                         View Feedback
                     </Button>

@@ -25,7 +25,7 @@ import axios from 'axios';
 
 export default function Courses() {
   const [professors, setProfessors] = useState<{ _id: string; Name: string }[]>([]);
-  const [courses, setCourses] = useState<{ id: string; name: string; professorId?: { Name: string }; year: string }[]>([]);
+  const [courses, setCourses] = useState<{ _id: string; id: string; name: string; professorId?: { Name: string }; year: string }[]>([]);
   const semesters = ['Monsoon', 'Winter', 'Summer'];
 
   const [formCourseCode, setFormCourseCode] = useState('');
