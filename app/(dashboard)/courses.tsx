@@ -33,6 +33,7 @@ export default function Courses() {
   const [formCourseProfName, setFormCourseProfName] = useState('');
   const [formYear, setFormYear] = useState('');
   const [formCourseType, setFormCourseType] = useState('');
+  const [open, setOpen] = useState(false);
 
 
   const fetchCourses = async () => {
@@ -77,8 +78,8 @@ export default function Courses() {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/course/create`, newCourse);
       console.log('Course added successfully:', response.data);
 
-      // Optionally, refresh the course list
       fetchCourses();
+      setOpen(false); // Close dialog on success
     } catch (error) {
       console.error('Failed to add course:', error);
     }
@@ -92,7 +93,7 @@ export default function Courses() {
             <CardTitle>Courses</CardTitle>
             <CardDescription className="mt-2">List of all courses</CardDescription>
           </div>
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button className="ml-auto">Add Course</Button>
             </DialogTrigger>
@@ -198,7 +199,7 @@ export default function Courses() {
                     Add Course
                   </Button>
                   <DialogClose asChild>
-                    <Button type="button" className="w-full">
+                    <Button type="button" className="w-full" onClick={() => setOpen(false)}>
                       Close
                     </Button>
                   </DialogClose>
