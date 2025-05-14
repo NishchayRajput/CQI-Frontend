@@ -73,7 +73,7 @@ function DesktopNav() {
   const [userRole,setUserRole] = useState<string>('');
   const checkAuth = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`, { withCredentials: true });
       setAuthStatus(response.data.loggedIn);
       setUserRole(response.data.user.role);
       console.log('Auth user:', response.data.role);
@@ -131,7 +131,7 @@ function MobileNav() {
   const [userRole,setUserRole] = useState<string>('');
   const checkAuth = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/check`, { withCredentials: true });
       setAuthStatus(response.data.loggedIn);
       setUserRole(response.data.user.role);
       console.log('Auth user:', response.data.role);
