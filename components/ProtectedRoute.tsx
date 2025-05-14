@@ -13,7 +13,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }
   }, [user, loading, router]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+    <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-black border-opacity-50"></div>
+  </div>;
   if (!user) return null; // Or a spinner
 
   return <>{children}</>;
