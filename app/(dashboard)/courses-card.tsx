@@ -134,7 +134,7 @@ export function CoursesCard({ className, id, courseCode, courseTitle, professorN
                         </DialogContent>
                     </Dialog>
                     <Button className="w-auto" onClick={() => {
-                        router.push(`/listFeedback/${id}`);
+                        router.push(`/${id}/feedback`);
                     }}>
                         View Feedback
                     </Button>

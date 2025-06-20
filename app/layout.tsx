@@ -2,7 +2,7 @@ import './globals.css';
 
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from "./context/AuthContext";
-
+import { Toaster } from "@/components/ui/sonner"
 export const metadata = {
   title: 'Next.js App Router + NextAuth + Tailwind CSS',
   description:
@@ -18,7 +18,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex min-h-screen w-full flex-col">
         <AuthProvider>
-          {children}
+          <Toaster></Toaster>
+            {children}
         </AuthProvider>
       </body>
       <Analytics />

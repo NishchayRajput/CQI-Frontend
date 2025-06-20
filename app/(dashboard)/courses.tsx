@@ -47,7 +47,7 @@ export default function Courses() {
   }
   const fetchProfessors = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/professor/list`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/professor/list/verified`);
       setProfessors(response.data);
     } catch (error) {
       console.error('Failed to fetch professors:', error);

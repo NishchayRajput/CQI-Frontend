@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import axios from "axios"
 import {
   ColumnDef,
@@ -64,8 +64,8 @@ const getColumns = (router: ReturnType<typeof useRouter>): ColumnDef<Payment>[] 
 
 export default function ListFeedback() {
   const router = useRouter()
-  const params = useParams()
-  const id = params.id as string
+  const pathname = usePathname()
+  const id = pathname.split("/")[1] // Extract the id from the URL
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -113,16 +113,6 @@ export default function ListFeedback() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter feedbacks..."
-          value={(table.getColumn("feedback")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("feedback")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>

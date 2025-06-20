@@ -15,9 +15,20 @@ import SCQuestion from '@/components/ui/sc_question';
 import AdditionalFeedback from '@/components/ui/additional_feedback';
 import router from 'next/router';
 import axios from 'axios';
+import {toast} from "sonner"
+
+// Define type for question data
+interface Question {
+  id: string;
+  text: string;
+  type: string;
+  options: string[];
+  answer: string;
+  number: number;
+}
 
 export default function FeedbackPage() {
-  const [formData, setFormData] = useState([]);
+  const [formData, setFormData] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const courseCode = searchParams.get("courseCode");
@@ -30,7 +41,7 @@ export default function FeedbackPage() {
       router.push("/error"); // Redirect to an error page
     }
   }, [courseCode, courseId, token, professorName, courseTitle, router]);
-
+    // const { toast } = useToast()
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -38,7 +49,7 @@ export default function FeedbackPage() {
         const data = await response.data;
         console.log(data);
         if (data.message === "Questions fetched successfully") {
-          const formattedData = data.questions.map((question, index) => ({
+          const formattedData = data.questions.map((question: any, index: any) => ({
             id: question._id,
             text: question.text,
             type: question.type,
@@ -58,7 +69,7 @@ export default function FeedbackPage() {
     fetchQuestions();
   }, []);
 
-  const handleInputChange = (questionId, value) => {
+  const handleInputChange = (questionId: string, value: string) => {
     setFormData((prev) =>
       prev.map((q) =>
         q.id === questionId ? { ...q, answer: value } : q
@@ -66,14 +77,14 @@ export default function FeedbackPage() {
     );
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
     // Transform formData into the required format
     const feedbackData = {
       courseId: searchParams.get('courseId'), // Assuming courseId is passed in the URL
       token: searchParams.get('t'), // Assuming token is passed in the URL
-      responses: formData.map((question) => ({
+      responses: formData.map((question: Question) => ({
         questionId: question.id,
         response: question.answer,
       })),
@@ -93,13 +104,28 @@ export default function FeedbackPage() {
       console.log(feedbackData);
       const result = await response.json();
       if (response.ok) {
+        toast("Success", {
+          description: result.message || "Feedback submitted successfully",
+        });
         console.log('Feedback submitted successfully:', result);
-        // Optionally, show a success message or redirect the user
+        // Redirect to a thank you page or clear the form
+        // You could add navigation here if needed
+      } else if (result.error === "Invalid session token") {
+        toast("Failed", {
+          description: "Feedback form has been closed ",
+        });
+        console.log('Invalid token for feedback submission:', result);
       } else {
-        console.error('Failed to submit feedback:', result);
+        toast("Error", {
+          description: result.message || "Failed to submit feedback",
+        });
+        console.log('Failed to submit feedback:', result);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      toast("Error", {
+        description: "Server error. Please try again later.",
+      });
       console.error('Error submitting feedback:', error);
     }
   };

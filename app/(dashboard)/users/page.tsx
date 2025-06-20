@@ -1,3 +1,4 @@
+'use client';
 import {
   Card,
   CardContent,
@@ -6,13 +7,31 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { UsersTable } from '../users-table';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 export default function UsersPage(
+
+  
+  
   props: {
     searchParams: Promise<{ q: string; offset: string }>;
   }
 ) {
-
+  //fetching list of users forom backend
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/users/list`);
+      const data = await response.data;
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+  
   const users: {
     id: number;
     name: string;
