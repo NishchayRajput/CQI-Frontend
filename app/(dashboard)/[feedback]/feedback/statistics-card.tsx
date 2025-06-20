@@ -46,11 +46,22 @@ export function StatsCard({ className, questionId, question, options, ...props }
     // Handle undefined options
     const safeOptions = options || { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, 'NA': 0 };
     
-    // Transform options data for the pie chart
-    const chartData = Object.entries(safeOptions).map(([key, value], index) => ({
-        id: index,
+    // Define consistent colors for each rating
+    const ratingColors = {
+        '1': '#FF6B6B', // Red for lowest rating
+        '2': '#FFA06B', // Light orange
+        '3': '#FFDC6B', // Yellow
+        '4': '#6BFF9E', // Light green
+        '5': '#38B84F', // Green for highest rating
+        'NA': '#BDBDBD'  // Gray for NA
+    };
+    
+    // Transform options data for the pie chart with consistent colors
+    const chartData = Object.entries(safeOptions).map(([key, value]) => ({
+        id: key,
         value,
-        label: key === 'NA' ? 'No Answer' : `Rating ${key}`
+        label: key === 'NA' ? 'No Answer' : `Rating ${key}`,
+        color: ratingColors[key as keyof typeof ratingColors]
     })).filter(item => item.value > 0); // Only show options with values > 0
     
     // Calculate total responses
@@ -90,7 +101,8 @@ export function StatsCard({ className, questionId, question, options, ...props }
                                   paddingAngle: 2,
                                   cornerRadius: 4,
                                   arcLabel: (item) => `${item.value}`,
-                                  arcLabelMinAngle: 45
+                                  arcLabelMinAngle: 45,
+                                  colors: chartData.map(item => item.color)
                               },
                           ]}
                           width={300}
